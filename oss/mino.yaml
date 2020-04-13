@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+    mino:
+        container_name: minio
+        image: "minio/minio"
+        volumes:
+            - ./data:/data
+        ports:
+            - "9000:9000"
+        command: ["server", "/data"]
+
