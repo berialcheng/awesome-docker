@@ -1,0 +1,67 @@
+version: '3.2'
+
+services:
+  # envoyproxy:
+  #   image: envoyproxy/envoy-dev:f599ad7c05824a2cdbcde60ab2c035d264cd4247
+  #   ports:
+  #     - 9901:9901
+  #     - 10000:10000
+  #   volumes:
+  #     - ./config:/etc/envoy
+
+  front-envoy:
+    image: envoyproxy/envoy-dev:f599ad7c05824a2cdbcde60ab2c035d264cd4247
+    volumes:
+      - ./config/front.yaml:/etc/envoy/envoy.yaml
+    networks:
+      - envoymesh
+    expose:
+      - "80"
+      - "8001"
+    ports:
+      - "8000:80"
+      - "8001:8001"
+
+  service1:
+    build:
+      context: build
+      dockerfile: Dockerfile-service
+    volumes:
+      - ./config/service1.yaml:/etc/service-envoy.yaml
+    networks:
+      envoymesh:
+        aliases:
+          - service1
+    environment:
+      - SERVICE_NAME=1
+    expose:
+      - "80"
+
+  service2:
+    build:
+      context: build
+      dockerfile: Dockerfile-service
+    volumes:
+      - ./config/service2.yaml:/etc/service-envoy.yaml
+    networks:
+      envoymesh:
+        aliases:
+          - service2
+    environment:
+      - SERVICE_NAME=2
+    expose:
+      - "80"
+
+  zipkin:
+    image: openzipkin/zipkin
+    networks:
+      envoymesh:
+        aliases:
+          - zipkin
+    expose:
+      - "9411"
+    ports:
+      - "9411:9411"
+
+networks:
+  envoymesh: {}
