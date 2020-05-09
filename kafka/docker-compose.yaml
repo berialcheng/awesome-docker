@@ -1,11 +1,61 @@
 version: '3'
 
 services:
-  kafka:
-    container_name: 'kafka'
-    image: 'bitnami/kafka:2'
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    volumes:
+      - ./zookeeper-persistence:/bitnami/zookeeper
     environment:
-      # - SERVER_NAME: kibana
-      KAFKA_CFG_ZOOKEEPER_CONNECT: my-zookeeper-svc:80
-      ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_CFG_LISTENERS: "PLAINTEXT://0.0.0.0:80"
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      #- ZOO_ENABLE_AUTH=yes
+      #- ZOO_SERVER_USERS=kafka
+      #- ZOO_SERVER_PASSWORDS=kafka_password
+
+  zookeeper-ui:
+    image: 'tobilg/zookeeper-webui'
+    ports:
+      - '8080:8080'
+    environment:
+      - ZK_DEFAULT_NODE=zookeeper:2181
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+    volumes:
+      - ./kafka-persistence:/bitnami/kafka
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      # SASL authentication over SSL
+      #- KAFKA_CFG_LISTENERS=SASL_SSL://:9092
+      #- KAFKA_CFG_ADVERTISED_LISTENERS=SASL_SSL://:9092
+      #- KAFKA_ZOOKEEPER_USER=kafka
+      #- KAFKA_ZOOKEEPER_PASSWORD=kafka_password
+    depends_on:
+      - zookeeper
+
+  # kafka-explore:
+  #   image: 'danielqsj/kafka-exporter'
+  #   ports:
+  #     - '9308:9308'
+  #   command: ["--kafka.server=kafka:9092"]
+  #   depends_on:
+  #     - kafka
+
+  kafka-manager:
+    image: 'sheepkiller/kafka-manager'
+    ports:
+      - '9000:9000'
+    environment:
+      - ZK_HOSTS=zookeeper:2181
+      - APPLICATION_SECRET=letmein
+    depends_on:
+      - kafka
+
+  centos:
+    image: 'centos:7'
+    command: ["bash"]
+    
