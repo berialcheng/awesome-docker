@@ -13,22 +13,20 @@ services:
       #- ZOO_SERVER_USERS=kafka
       #- ZOO_SERVER_PASSWORDS=kafka_password
 
-  zookeeper-ui:
-    image: 'tobilg/zookeeper-webui'
-    ports:
-      - '8080:8080'
-    environment:
-      - ZK_DEFAULT_NODE=zookeeper:2181
-
   kafka:
     image: 'bitnami/kafka:latest'
     ports:
       - '9092:9092'
+      - '29092:29092'
     volumes:
       - ./kafka-persistence:/bitnami/kafka
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_LISTENERS=LISTENER_BOB://kafka:9092,LISTENER_FRED://0.0.0.0:29092
+      - KAFKA_ADVERTISED_LISTENERS=LISTENER_BOB://kafka:9092,LISTENER_FRED://localhost:29092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=LISTENER_BOB:PLAINTEXT,LISTENER_FRED:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=LISTENER_BOB
       # SASL authentication over SSL
       #- KAFKA_CFG_LISTENERS=SASL_SSL://:9092
       #- KAFKA_CFG_ADVERTISED_LISTENERS=SASL_SSL://:9092
@@ -48,14 +46,14 @@ services:
   kafka-manager:
     image: 'sheepkiller/kafka-manager'
     ports:
-      - '9000:9000'
+      - '9091:9000'
     environment:
       - ZK_HOSTS=zookeeper:2181
       - APPLICATION_SECRET=letmein
     depends_on:
       - kafka
 
-  centos:
-    image: 'centos:7'
-    command: ["bash"]
+  kafkacat:
+    image: confluentinc/cp-kafkacat
+    command: sleep infinity
     
