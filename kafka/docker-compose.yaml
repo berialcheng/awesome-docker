@@ -6,7 +6,7 @@ services:
     ports:
       - '2181:2181'
     volumes:
-      - ./zookeeper-persistence:/bitnami/zookeeper
+      - ./zookeeper-persistence/zookeeper0:/bitnami/zookeeper
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
       #- ZOO_ENABLE_AUTH=yes
