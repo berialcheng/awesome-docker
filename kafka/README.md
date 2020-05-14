@@ -31,7 +31,7 @@
 # Get started - fullstack
 0. `docker-compose -f docker-compose-fullstack.yaml up -d`
 1. 
-2. http://localhost:8888/
+2. `http://localhost:8888/`
 ```
 create schema in;
 CREATE TABLE accounts(id SERIAL, name VARCHAR(255));
@@ -52,13 +52,28 @@ incrementing.column.name=id
 ```
 4. check schema `http://localhost:8001`
 5. check topic content `http://localhost:8000` (add/modify data)
-6. docker-compose -f docker-compose-fullstack.yaml exec ksqldb-server ksql
+6. `docker-compose -f docker-compose-fullstack.yaml exec ksqldb-server ksql`
+ (or `docker run -it confluentinc/cp-ksqldb-cli http://localhost:8088`)
 ```
-CREATE STREAM ACC (id BIGINT, name VARCHAR) WITH (KAFKA_TOPIC='inqaccounts', VALUE_FORMAT='AVRO');
+CREATE STREAM k WITH (
+    kafka_topic = 'inqaccounts',
+    value_format = 'avro'
+);
+SHOW STREAMS;
+
+SELECT id, name FROM k EMIT CHANGES; # add record to postgres
+
+CREATE TABLE support_view AS
+    SELECT id, name FROM k EMIT CHANGES;
+
 SHOW TABLES;
-SELECT * FROM ACC EMIT CHANGES;
+
+SHOW TOPICS;
+PRINT 'inqaccounts' FROM BEGINNING;
+
+SHOW CONNECTORS;
 ```
-7. docker run -it confluentinc/cp-ksqldb-cli http://localhost:8088
+
 
 # References
 * [bitnami kafka image](https://hub.docker.com/r/bitnami/kafka)
@@ -71,3 +86,4 @@ SELECT * FROM ACC EMIT CHANGES;
 * [Kafka sink connector jdbc](https://docs.confluent.io/current/connect/kafka-connect-jdbc/sink-connector/index.html#connect-jdbc-sink)
 * [Troubleshooting KSQL – Part 1: Why Isn’t My KSQL Query Returning Data?](https://www.confluent.io/blog/troubleshooting-ksql-part-1/)
 * [Troubleshooting KSQL – Part 2: What’s Happening Under the Covers?](https://www.confluent.io/blog/troubleshooting-ksql-part-2/)
+* [Ksql queries](https://docs.ksqldb.io/en/latest/concepts/queries/)
