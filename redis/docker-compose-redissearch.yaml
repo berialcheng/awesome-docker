@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  redis:
+    # https://oss.redislabs.com/redisearch/
+    image: redislabs/redisearch:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data0:/data 
+    
