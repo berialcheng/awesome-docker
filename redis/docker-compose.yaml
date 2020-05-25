@@ -8,6 +8,6 @@ services:
     volumes:
       - ./data0:/data 
       - ./etc/redis.conf:/usr/local/etc/redis/redis.conf
-    commands:
+    command:
       ["redis-server", "/usr/local/etc/redis/redis.conf"]
     
