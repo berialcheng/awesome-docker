@@ -1,4 +1,4 @@
-# awesome-docker-compose
+# awesome-docker
 Curated collection of recipes for docker compose
 
 * zookeeper 
